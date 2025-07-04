@@ -1,0 +1,40 @@
+// UPDATED prisma/schema.prisma
+// Remove isAdmin field, only hardcode one admin user manually
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  products  Product[]    @relation("UserProducts")
+  orders    Order[]      @relation("UserOrders")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
+  createdBy   User     @relation("UserProducts", fields: [creatorId], references: [id])
+  creatorId   Int
+  orders      Order[]
+}
+
+model Order {
+  id        Int     @id @default(autoincrement())
+  user      User    @relation("UserOrders", fields: [userId], references: [id])
+  userId    Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  quantity  Int
+  total     Float
+}
